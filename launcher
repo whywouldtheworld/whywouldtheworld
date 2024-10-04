@@ -1,0 +1,569 @@
+--//=========================//
+  local ESP = loadstring(game:HttpGet("https://raw.githubusercontent.com/zerox-fr/zerox-mq/main/ESP"))(); ESP.BoxType = "Corner Box Esp"
+  loadstring(game:HttpGet('https://raw.githubusercontent.com/zerox-fr/zerox-mq/main/Ui'))()
+--//=========================//
+  local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+  local placemarker = Instance.new("Part", game.Workspace)
+--//=========================//
+  local flighttype = "CFrame"
+  local flightenabledx = false
+  local speedenabledx = false
+  local flightenabled = false
+  local speedenabled = false
+  local speedspeed = 1.240
+  local flightspeed = 4
+  local flightkey = "DPadUp"
+  local speedkey = "DPadDown"
+--//=========================//
+  local aimmethod = "MoveDirection"
+  local aimpart = "HumanoidRootPart"
+  local teamcheck = false
+  local velpred = 2.1
+  local trgsetkey = "DPadRight"
+  local aimkey = "DPadLeft"
+  local aiming = false
+  local bulletset = false
+  local aim = false
+  local shake = false
+  local shakestrenght = 2
+  local Plr
+--//=========================//
+
+game:GetService("UserInputService").InputBegan:Connect(function(KeyPressed)
+ if KeyPressed.KeyCode == Enum.KeyCode[speedkey] and speedenabledx == true then
+  if speedenabled then
+   speedenabled = false
+    else
+   speedenabled = true
+  end
+ end
+end)
+
+game:GetService("RunService").Heartbeat:Connect(function()
+ if speedenabled and speedenabledx == true then
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame =
+      game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame +
+    game.Players.LocalPlayer.Character.Humanoid.MoveDirection * speedspeed
+  end
+end)
+
+
+function fly(type)
+ if type == "Vehicle" then
+  local controlModule = require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
+  local BodyVelocity = Instance.new("BodyVelocity")
+  local BodyGyro = Instance.new("BodyGyro")
+   
+  BodyVelocity.Name = "bodyvelocity"
+  BodyVelocity.Parent = game.Players.LocalPlayer.Character.HumanoidRootPart
+  BodyVelocity.MaxForce = Vector3.new(0, 0, 0)
+  BodyVelocity.Velocity = Vector3.new(0, 0, 0)
+
+  BodyGyro.Name = "bodygyro"
+  BodyGyro.Parent = game.Players.LocalPlayer.Character.HumanoidRootPart
+  BodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+  BodyGyro.P = 1000; BodyGyro.D = 50
+
+  local rs1 = game:GetService("RunService").RenderStepped:Connect(function()
+   if game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid") and game.Players.LocalPlayer.Character.HumanoidRootPart and game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("bodyvelocity") and game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("bodygyro") then
+	local humanoid = game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid")
+	local direction = controlModule:GetMoveVector()
+	
+    local VelocityHandler = game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("bodyvelocity")
+	VelocityHandler.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+	VelocityHandler.Velocity = Vector3.new()
+	
+	local GyroHandler = game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("bodygyro")
+	GyroHandler.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+	GyroHandler.CFrame = workspace.Camera.CoordinateFrame
+	
+	if direction.X > 0 then
+		VelocityHandler.Velocity = VelocityHandler.Velocity + workspace.Camera.CFrame.RightVector * (direction.X * ((flightspeed) * 50))
+    end
+	if direction.X < 0 then
+		VelocityHandler.Velocity = VelocityHandler.Velocity + workspace.Camera.CFrame.RightVector * (direction.X * ((flightspeed) * 50))
+	end
+	if direction.Z > 0 then
+		VelocityHandler.Velocity = VelocityHandler.Velocity - workspace.Camera.CFrame.LookVector * (direction.Z * ((flightspeed) * 50))
+	end
+	if direction.Z < 0 then
+		VelocityHandler.Velocity = VelocityHandler.Velocity - workspace.Camera.CFrame.LookVector * (direction.Z * ((flightspeed) * 50))
+    end
+   end
+  end)
+ elseif type == "CFrame" then
+	game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').PlatformStand = true
+	local Head = game.Players.LocalPlayer.Character:WaitForChild("Head")
+	Head.Anchored = true
+	CFloop = game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
+		local moveDirection = game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').MoveDirection * (flightspeed * deltaTime)
+		local headCFrame = Head.CFrame
+		local cameraCFrame = workspace.CurrentCamera.CFrame
+		local cameraOffset = headCFrame:ToObjectSpace(cameraCFrame).Position
+		cameraCFrame = cameraCFrame * CFrame.new(-cameraOffset.X, -cameraOffset.Y, -cameraOffset.Z + 1)
+		local cameraPosition = cameraCFrame.Position
+		local headPosition = headCFrame.Position
+
+		local objectSpaceVelocity = CFrame.new(cameraPosition, Vector3.new(headPosition.X, cameraPosition.Y, headPosition.Z)):VectorToObjectSpace(moveDirection)
+		Head.CFrame = CFrame.new(headPosition) * (cameraCFrame - cameraPosition) * CFrame.new(objectSpaceVelocity)
+	end)
+ end
+end
+
+function unfly(type)
+  if type == "Vehicle" then
+	game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("bodyvelocity"):Destroy()
+	game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("bodygyro"):Destroy()
+	game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid").PlatformStand = false
+	rs1:Disconnect(); char:Disconnect()
+  elseif type == "CFrame" then
+    game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').PlatformStand = false
+	local Head = game.Players.LocalPlayer.Character:WaitForChild("Head")
+	Head.Anchored = false
+	CFloop:Disconnect()
+  end
+end
+
+function getClosestPlayerToCursor()
+if teamcheck == false then
+    local closestPlayer
+    local shortestDistance = math.huge
+
+    for i, v in pairs(game.Players:GetPlayers()) do
+        if
+            v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("Humanoid") and
+                v.Character.Humanoid.Health ~= 0 and
+                v.Character:FindFirstChild("HumanoidRootPart")
+         then
+            local pos = workspace.Camera:WorldToViewportPoint(v.Character.PrimaryPart.Position)
+            local magnitude = (Vector2.new(pos.X, pos.Y) - Vector2.new(game.Players.LocalPlayer:GetMouse().X, game.Players.LocalPlayer:GetMouse().Y)).magnitude
+            if magnitude < shortestDistance then
+                closestPlayer = v
+                shortestDistance = magnitude
+            end
+        end
+    end
+    return closestPlayer
+elseif teamcheck == true then
+    local closestPlayer
+    local shortestDistance = math.huge
+
+    for i, v in pairs(game.Players:GetPlayers()) do
+        if
+            v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("Humanoid") and v.TeamColor ~= game.Players.LocalPlayer.TeamColor and
+                v.Character.Humanoid.Health ~= 0 and
+                v.Character:FindFirstChild("HumanoidRootPart")
+         then
+            local pos = workspace.Camera:WorldToViewportPoint(v.Character.PrimaryPart.Position)
+            local magnitude = (Vector2.new(pos.X, pos.Y) - Vector2.new(game.Players.LocalPlayer:GetMouse().X, game.Players.LocalPlayer:GetMouse().Y)).magnitude
+            if magnitude < shortestDistance then
+                closestPlayer = v
+                shortestDistance = magnitude
+            end
+        end
+    end
+    return closestPlayer
+end
+end
+
+game:GetService("UserInputService").InputBegan:Connect(function(KeyPressed)
+if KeyPressed.KeyCode == Enum.KeyCode[trgsetkey] and aim == true then
+if bulletset then
+ bulletset = false
+  Plr = nil
+  placemarker.CFrame = CFrame.new(0,-7281829,0)
+else
+  Plr = getClosestPlayerToCursor()
+  bulletset = true
+end
+end
+end)
+
+game:GetService("UserInputService").InputBegan:Connect(function(KeyPressed)
+if KeyPressed.KeyCode == Enum.KeyCode[aimkey] and aim == true then
+if aiming then
+  aiming = false
+else
+  aiming = true
+end
+end
+end)
+
+game:GetService("UserInputService").InputBegan:Connect(function(KeyPressed)
+if KeyPressed.KeyCode == Enum.KeyCode[flightkey] and flightenabledx == true and flighttype == "Vehicle" then
+if flightenabled == false then
+  flightenabled = true
+  fly("Vehicle")
+else
+  flightenabled = false
+  unfly("Vehicle")
+end
+elseif KeyPressed.KeyCode == Enum.KeyCode[flightkey] and flightenabledx == true and flighttype == "CFrame" then
+if flightenabled == false then
+  flightenabled = true
+  fly("CFrame")
+else
+  flightenabled = false
+  unfly("CFrame")
+end
+end
+end)
+
+game:GetService("RunService").Heartbeat:Connect(function()
+ if aiming == true and aim == true and Plr ~= nil and game.Players:FindFirstChild(Plr.Name) and shake == true then
+  game.Players.LocalPlayer.Character.Humanoid.CameraOffset = Vector3.new(math.random(-shakestrenght,shakestrenght)/1000,math.random(-shakestrenght,shakestrenght)/1000,math.random(-shakestrenght,shakestrenght)/1000)
+ end
+end)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+if aiming == true and aim == true and Plr ~= nil and game.Players:FindFirstChild(Plr.Name) then
+    if aimmethod == "Velocity" then
+    workspace.Camera.CFrame = CFrame.new(workspace.Camera.CFrame.Position, Plr.Character[aimpart].Position + (Plr.Character[aimpart].Velocity * velpred))
+    elseif aimmethod == "CFrame" then
+    workspace.Camera.CFrame = CFrame.new(workspace.Camera.CFrame.Position, Plr.Character[aimpart].Position)
+    elseif aimmethod == "MoveDirection" then
+    workspace.Camera.CFrame = CFrame.new(workspace.Camera.CFrame.Position, Plr.Character[aimpart].Position + (Plr.Character.Humanoid.MoveDirection * velpred))
+    end
+end
+if aim == false then
+ bulletset = false
+ aiming = false
+ placemarker.CFrame = CFrame.new(0,-9999287,0)
+end
+end)
+
+    placemarker.Anchored = true
+    placemarker.CanCollide = false
+    placemarker.Size = Vector3.new(0,0,0)
+    placemarker.Transparency = 0.1
+    local e = Instance.new("BillboardGui", placemarker)
+    e.Name = "PP"
+    e.Adornee = placemarker
+    e.Size = UDim2.new(0.20, 0, 0.20, 0)
+    e.AlwaysOnTop = true
+    local a = Instance.new("Frame", e)
+    a.Size = UDim2.new(4, 0, 4, 0)
+    a.BackgroundTransparency = 0.1
+    a.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    local g = Instance.new("UICorner", a)
+    g.CornerRadius = UDim.new(0.8, 0)
+
+placemarker.CFrame = CFrame.new(0,-7281829,0)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+  if bulletset == true and aim == true and Plr ~= nil and game.Players:FindFirstChild(Plr.Name) then
+    if aimmethod == "CFrame" then
+    placemarker.CFrame = CFrame.new(Plr.Character[aimpart].Position)
+    elseif aimmethod == "Velocity" then
+    placemarker.CFrame = CFrame.new(Plr.Character[aimpart].Position + (Plr.Character[aimpart].Velocity * velpred))
+    elseif aimmethod == "MoveDirection" then
+    placemarker.CFrame = CFrame.new(Plr.Character[aimpart].Position + (Plr.Character.Humanoid.MoveDirection * velpred))
+    end
+  end
+end)
+
+local Library = initLibrary()
+
+local Window = Library:Load({name = "whythezerox :/", sizeX = 340, sizeY = 280, color = Color3.fromRGB(255, 255, 255)})
+
+
+local Tab = Window:Tab("Aiming")
+local Tab2 = Window:Tab("Movement")
+local Tab3 = Window:Tab("Visual")
+local sets = Window:Tab("Settings")
+
+local aims1 = Tab:Section{name = "Aiming", column = 1}
+local aims2 = Tab:Section{name = "Aim Settings", column = 2}
+
+local moves1 = Tab2:Section{name = "Fly", column = 1}
+local moves2 = Tab2:Section{name = "Speed", column = 2}
+
+local esp1 = Tab3:Section{name = "Esp", column = 1}
+
+local sets1 = sets:Section{name = "Ui Settings", column = 1}
+local sets2 = sets:Section{name = "Game Features", column = 2}
+
+aims1:Toggle {
+    Name = "enabled",
+    flag = "1",
+    callback = function(x)
+    aim = x
+    end
+
+}
+
+aims1:Toggle {
+    Name = "team check",
+    flag = "2",
+    callback = function(x)
+    teamcheck = x
+    end
+}
+
+aims1:Toggle {
+   Name = "shake",
+   flag = "3",
+   callback = function(x)
+   shake = x
+   end
+}
+
+aims2:dropdown {
+    name = "method",
+    flag = "4",
+    content = {"Velocity","CFrame","MoveDirection"},
+    multichoice = false,
+    callback = function(x)
+    aimmethod = x
+    end
+}
+
+aims2:dropdown {
+    name = "part",
+    flag = "5",
+    content = {"Head","UpperTorso","HumanoidRootPart","LowerTorso"},
+    multichoice = false,
+    callback = function(x)
+    aimpart = x
+    end
+}
+
+
+aims2:Box {
+   Name = "prediction",
+   flag = "6",
+   Default = "0",
+   callback = function(x)
+   velpred = x
+   end
+}
+
+aims2:Slider {
+    Default = 0,
+    Min = 52,
+    Max = 1488,
+    flag = "7",
+    valueText = "shake strenght: [VALUE]",
+    callback = function(x)
+    shakestrenght = x
+    end
+}
+
+aims2:Box {
+   Name = "set target hotkey",
+   flag = "8",
+   Default = "Backspace",
+   callback = function(x)
+   trgsetkey = x
+   end
+}
+
+aims2:Box {
+   Name = "start aim hotkey",
+   flag = "9",
+   Default = "Backspace",
+   callback = function(x)
+   aimkey = x
+   end
+}
+
+moves1:Toggle {
+    Name = "enabled",
+    flag = "10",
+    callback = function(x)
+    flightenabledx = x
+    end
+
+}
+
+moves1:dropdown {
+    name = "method",
+    flag = "11",
+    content = {"Vehicle","CFrame"},
+    multichoice = false,
+    callback = function(x)
+    flighttype = x
+    end
+}
+
+
+moves1:Box {
+   Name = "speed",
+   flag = "12",
+   Default = "0",
+   callback = function(x)
+   flightspeed = x
+   end
+}
+
+moves1:Box {
+   Name = "key",
+   flag = "13",
+   Default = "Backspace",
+   callback = function(x)
+   flightkey = x
+   end
+}
+
+moves2:Toggle {
+    Name = "enabled",
+    flag = "14",
+    callback = function(x)
+    speedenabledx = x
+    end
+}
+
+moves2:Box {
+   Name = "speed",
+   flag = "15",
+   Default = "0",
+   callback = function(x)
+   speedspeed = x
+   end
+}
+
+moves2:Box {
+   Name = "key",
+   flag = "16",
+   Default = "Backspace",
+   callback = function(x)
+   speedkey = x
+   end
+}
+
+esp1:Toggle {
+    Name = "enabled",
+    flag = "17",
+    callback = function(x)
+    ESP.Enabled = x
+    end
+}
+
+esp1:Toggle {
+    Name = "box",
+    flag = "18",
+    callback = function(x)
+    ESP.ShowBox = x
+    end
+}
+
+esp1:Toggle {
+    Name = "name",
+    flag = "19",
+    callback = function(x)
+    ESP.ShowName = x
+    end
+}
+
+esp1:Toggle {
+    Name = "health",
+    flag = "20",
+    callback = function(x)
+    ESP.ShowHealth = x
+    end
+}
+
+esp1:Toggle {
+    Name = "tracer",
+    flag = "21",
+    callback = function(x)
+    ESP.ShowTracer = x
+    end
+}
+
+esp1:Toggle {
+    Name = "distance",
+    flag = "22",
+    callback = function(x)
+    ESP.ShowDistance = x
+    end
+}
+
+--// settings
+sets1:Box {
+   Name = "Ui Hotkey",
+   flag = "23",
+   Default = "Backspace",
+   callback = function(x)
+   Library:SetKey(x)
+   end
+}
+
+sets1:ColorPicker {
+   Name = "Ui Color",
+   Default = Color3.fromRGB(255, 255, 255),
+   callback = function(x)
+   Library:SetColor(Color3.fromRGB(x.R * 255, x.G * 255, x.B * 255))
+   end
+}
+
+sets1:Box {
+   Name = "Config Name",
+   Default = "Config",
+   callback = function(x)
+   cfgname = x
+   end
+}
+
+sets1:Button {
+   Name = "Save Config",
+   callback = function()
+   Library:SaveConfig(cfgname)
+   end
+}
+
+sets1:Button {
+   Name = "Load Config",
+   callback = function()
+   Library:LoadConfig(cfgname)
+   end
+}
+
+sets2:Button {
+   Name = "Rejoin",
+   callback = function()
+   game.TeleportService:Teleport(game.PlaceId, game.Players.LocalPlayer)
+   end
+}
+
+sets2:Button {
+   Name = "ServerHop",
+   callback = function()
+        HttpService = cloneref(game:GetService("HttpService"))
+        httprequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+        local servers = {}
+        local req = httprequest({Url = string.format("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Desc&limit=100&excludeFullGames=true", game.PlaceId)})
+        local body = HttpService:JSONDecode(req.Body)
+
+        if body and body.data then
+            for i, v in next, body.data do
+                if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers) and v.playing < v.maxPlayers and v.id ~= game.JobId then
+                    table.insert(servers, 1, v.id)
+                end
+            end
+        end
+
+        if #servers > 0 then
+            game.TeleportService:TeleportToPlaceInstance(game.PlaceId, servers[math.random(1, #servers)], game.Players.LocalPlayer)
+        else
+            return warn("Couldn't Find A Server")
+        end
+   end
+}
+
+sets2:Button {
+   Name = "Unlock Fps",
+   callback = function()
+   setfpscap(999)
+   end
+}
+
+sets2:Slider {
+    Default = 70,
+    Min = 70,
+    Max = 120,
+    valueText = "Field Of View: [VALUE]",
+    callback = function(x)
+    workspace.Camera.FieldOfView = tostring(x)
+    end
+}
