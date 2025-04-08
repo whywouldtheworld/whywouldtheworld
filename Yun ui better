@@ -163,10 +163,6 @@ function initLibrary()
 
     local coloredGradients = {}
 
-    function library:OpenClose()
-      library.toggled = not library.toggled
-      gui.Enabled = library.toggled
-    end
     function library:SetColor(color)
      library.color = color
     end
@@ -177,7 +173,11 @@ function initLibrary()
 
     local gui = utility.create("ScreenGui")
 
-
+    function library:OpenClose()
+      library.toggled = not library.toggled
+      gui.Enabled = library.toggled
+    end
+    
     inputService.InputBegan:Connect(function(input)
         if input.KeyCode == library.keybind then
             library.toggled = not library.toggled
