@@ -2040,8 +2040,16 @@ function initLibrary()
                             end
                         end)
                     end
-
-
+                    
+                    function dropdownTypes:Clear()
+                      for k in pairs (content) do
+                        if contentHolder:FindFirstChild(k) then
+                          contentHolder:FindFirstChild(k):Destroy()
+                          table[k] = nil
+                        end
+                      end
+                    end
+                    
                     function dropdownTypes:Remove(opt)
                         if table.find(content, opt) then
                             if not multiChoice then
