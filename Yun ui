@@ -163,6 +163,7 @@ function initLibrary()
 
     local coloredGradients = {}
 
+
     function library:SetColor(color)
      library.color = color
     end
@@ -173,11 +174,7 @@ function initLibrary()
 
     local gui = utility.create("ScreenGui")
 
-    function library:OpenClose()
-      library.toggled = not library.toggled
-      gui.Enabled = library.toggled
-    end
-    
+
     inputService.InputBegan:Connect(function(input)
         if input.KeyCode == library.keybind then
             library.toggled = not library.toggled
@@ -2518,6 +2515,18 @@ function initLibrary()
 
 
                     local keys = {
+                        [Enum.KeyCode.DPadRight] = "DPad Right";
+                        [Enum.KeyCode.DPadLeft] = "DPad Left";
+                        [Enum.KeyCode.DPadUp] = "DPad Up";
+                        [Enum.KeyCode.DPadDown] = "DPad Down";
+                        [Enum.KeyCode.ButtonR1] = "R1";
+                        [Enum.KeyCode.ButtonR2] = "R2";
+                        [Enum.KeyCode.ButtonL1] = "L1";
+                        [Enum.KeyCode.ButtonL2] = "L2";
+                        [Enum.KeyCode.ButtonA] = "Button A";
+                        [Enum.KeyCode.ButtonB] = "Button B";
+                        [Enum.KeyCode.ButtonY] = "Button Y";
+                        [Enum.KeyCode.ButtonX] = "Button X";
                         [Enum.KeyCode.LeftShift] = "Left Shift";
                         [Enum.KeyCode.RightShift] = "Right Shift";
                         [Enum.KeyCode.LeftControl] = "Left Ctrl";
