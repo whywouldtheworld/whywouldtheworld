@@ -2043,8 +2043,8 @@ function initLibrary()
                     
                     function dropdownTypes:Clear()
                       for i,v in pairs (content) do
-                        if contentHolder:FindFirstChild(i) then
-                          contentHolder:FindFirstChild(i):Destroy()
+                        if contentHolder:FindFirstChild(v) then
+                          contentHolder:FindFirstChild(v):Destroy()
                           content[i] = nil
                         end
                       end
