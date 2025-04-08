@@ -773,11 +773,11 @@ function initLibrary()
                     local options = utility.table(opts)
                     local name = options.name
                     local callback = options.callback
-
+                    
 
                     local button = utility.create("TextButton", {
                         ZIndex = 3,
-                        Size = UDim2.new(1, 0, 0, 32),
+                        Size = UDim2.new(1.5, 0, 0, 16),
                         BorderColor3 = Color3.fromRGB(22, 22, 22),
                         Font = Enum.Font.Gotham,
                         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
