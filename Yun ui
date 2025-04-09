@@ -2502,7 +2502,7 @@ function initLibrary()
                     return keybindTypes
                 end
 
-
+-- broken one function
                 function sectionTypes:ToggleKeybind(opts)
                     local options = utility.table(opts)
                     local name = options.name or "Toggle Keybind"
